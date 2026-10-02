@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rideout – ride with your own kind</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#eef1ef;--panel:#fff;--ink:#16212b;--mute:#5d6b76;--line:#d5dcd9;--acc:#0f8f7c;--accink:#fff;--amber:#b87400;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1820;--panel:#17232e;--ink:#e8eef2;--mute:#8fa1ad;--line:#26364380;--acc:#3ccab4;--accink:#08211c;--amber:#f2b84b}}
+:root[data-theme="dark"]{--bg:#0f1820;--panel:#17232e;--ink:#e8eef2;--mute:#8fa1ad;--line:#26364380;--acc:#3ccab4;--accink:#08211c;--amber:#f2b84b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;margin:0;line-height:1.05}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.btn{background:var(--acc);color:var(--accink);border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 12px;font-size:14px}
+input,select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:4px}
+label{display:block;font-size:14px;color:var(--mute);margin-top:12px}
+/* sign in */
+#auth{min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+#auth h1{font-size:64px;font-weight:700}
+#auth p{color:var(--mute);max-width:44ch}
+.road{height:6px;margin:18px 0;background:repeating-linear-gradient(90deg,var(--acc) 0 36px,transparent 36px 60px);border-radius:3px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+/* app */
+header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+header h2{font-size:30px}
+.me{font-size:14px;color:var(--mute);text-align:right}
+nav{display:flex;gap:4px;margin:14px 0;border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:2}
+nav button{flex:1;background:none;border:0;padding:12px 4px;font-weight:600;color:var(--mute);border-bottom:3px solid transparent;cursor:pointer}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--acc)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grow{flex:1}
+.list{display:grid;gap:10px;margin-top:12px}
+.ride{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+.time{font-family:"Barlow Condensed",sans-serif;font-size:34px;font-weight:700;line-height:1;text-align:center;min-width:76px}
+.time small{display:block;font:500 13px Barlow,sans-serif;color:var(--mute)}
+.tag{display:inline-block;font-size:13px;border:1px solid var(--line);border-radius:99px;padding:1px 10px;margin-right:6px;color:var(--mute)}
+.tag.match{border-color:var(--acc);color:var(--acc)}
+.empty{color:var(--mute);text-align:center;padding:28px 8px}
+.bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--amber);transition:width .3s}
+.done h3::after{content:" – complete";color:var(--acc);font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+.grid figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.grid img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.grid figcaption{padding:8px 10px;font-size:14px}
+.sw{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}
+.sw input{width:auto;margin:0}
+details summary{cursor:pointer;font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section id="auth" hidden>
+  <div class="road"></div>
+  <h1>Rideout</h1>
+  <p>Find riders on the same kind of bike in your area. Post when you're heading out, see when others are, take on challenges and share your photos.</p>
+  <form id="signin" class="card" style="margin-top:16px" onsubmit="return false">
+    <div class="row"><button type="button" class="btn sm" id="m1">Create account</button><button type="button" class="btn ghost sm" id="m2">Sign in</button></div>
+    <label for="n">Rider name</label><input id="n" maxlength="24" autocomplete="username">
+    <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+    <div id="reg"><label for="t">Bike type</label><select id="t"></select>
+    <label for="a">Area (town or suburb)</label><input id="a" maxlength="30" placeholder="e.g. Bloemfontein"></div>
+    <p id="err" style="color:var(--amber);margin:10px 0 0" role="alert"></p>
+    <button class="btn" style="margin-top:12px;width:100%" id="go">Create account</button>
+  </form>
+</section>
+<section id="app" hidden>
+  <header><h2>Rideout</h2><div class="me"><span id="who"></span><br><button class="btn ghost sm" id="out">Sign out</button></div></header>
+  <nav role="tablist" id="tabs">
+    <button role="tab" data-t="rides" aria-selected="true">Rides</button>
+    <button role="tab" data-t="riders" aria-selected="false">Riders</button>
+    <button role="tab" data-t="chal" aria-selected="false">Challenges</button>
+    <button role="tab" data-t="gal" aria-selected="false">Gallery</button>
+  </nav>
+  <main id="view"></main>
+</section>
+</div>
+<script>
+const TYPES=["Sport","Naked","Cruiser","Adventure","Touring","Scrambler / Off-road"];
+const CHAL=[{id:"c1",t:"Sunrise rider",d:"Join 3 rides that start before 7:00.",goal:3},
+ {id:"c2",t:"Ride-along",d:"Join 5 rides with other riders.",goal:5},
+ {id:"c3",t:"Scenic hunter",d:"Upload 4 photos from a ride.",goal:4},
+ {id:"c4",t:"New faces",d:"Join rides hosted by 3 different riders.",goal:3}];
+let tok=null,S=null,last="",tab="rides",onlyMine=true,mode="reg";
+try{tok=localStorage.getItem("rideout_token")}catch(e){}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm=s=>String(s).trim().toLowerCase();
+$("#t").innerHTML=TYPES.map(t=>`<option>${t}</option>`).join("");
+async function api(p,method="GET",data){const r=await fetch("/api"+p,{method,headers:{"Content-Type":"application/json",...(tok?{Authorization:"Bearer "+tok}:{})},body:data?JSON.stringify(data):undefined});
+ const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||"Something went wrong.");e.status=r.status;throw e}return j}
+const nm=id=>esc((S.riders.find(r=>r.id===id)||{}).name||"A rider");
+const mine=o=>norm(o.type)===norm(S.me.type)&&norm(o.area)===norm(S.me.area);
+const act=async f=>{try{await f();await load(true)}catch(e){alert(e.message)}};
+
+function setMode(m){mode=m;$("#reg").hidden=m!=="reg";$("#go").textContent=m==="reg"?"Create account":"Sign in";
+ $("#m1").className="btn sm"+(m==="reg"?"":" ghost");$("#m2").className="btn sm"+(m==="reg"?" ghost":"");$("#err").textContent="";
+ $("#pw").autocomplete=m==="reg"?"new-password":"current-password"}
+$("#m1").onclick=()=>setMode("reg");$("#m2").onclick=()=>setMode("in");
+$("#go").onclick=async()=>{try{const d={name:$("#n").value,password:$("#pw").value};
+ if(mode==="reg"){d.type=$("#t").value;d.area=$("#a").value}
+ const r=await api(mode==="reg"?"/register":"/login","POST",d);tok=r.token;try{localStorage.setItem("rideout_token",tok)}catch(e){}
+ $("#pw").value="";await load(true)}catch(e){$("#err").textContent=e.message}};
+$("#out").onclick=()=>{tok=null;S=null;try{localStorage.removeItem("rideout_token")}catch(e){}show(false)};
+$("#tabs").onclick=e=>{const b=e.target.closest("button");if(!b)return;tab=b.dataset.t;
+ document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));render()};
+function show(on){$("#auth").hidden=on;$("#app").hidden=!on}
+
+async function load(force){
+ if(!tok){show(false);return}
+ try{const s=await api("/state"),j=JSON.stringify(s);
+  const busy=document.activeElement&&$("#view").contains(document.activeElement)||document.querySelector("#view details[open]");
+  if(!force&&(j===last||busy))return;
+  last=j;S=s;show(true);$("#who").textContent=`${S.me.name} · ${S.me.type} · ${S.me.area}`;render()}
+ catch(e){if(e.status===401){tok=null;show(false)}}}
+setInterval(()=>load(false),8000);
+function render(){if(S)({rides:vRides,riders:vRiders,chal:vChal,gal:vGal})[tab]()}
+const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+function fmtDate(d){const t=new Date(d+"T00:00"),n=new Date();n.setHours(0,0,0,0);const x=Math.round((t-n)/864e5);return x===0?"Today":x===1?"Tomorrow":t.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}
+
+function vRides(){
+ const now=today(),me=S.me.id;
+ let rs=S.rides.filter(r=>r.date>=now).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));if(onlyMine)rs=rs.filter(mine);
+ $("#view").innerHTML=`<details class="card"><summary>Post a ride</summary>
+  <label for="rd">Day</label><input id="rd" type="date" min="${now}" value="${now}">
+  <label for="rt">Leaving at</label><input id="rt" type="time" value="08:00">
+  <label for="rs">Meeting spot</label><input id="rs" maxlength="60" placeholder="Where you're meeting">
+  <p style="margin:10px 0 0;color:var(--mute);font-size:14px">Posts to ${esc(S.me.type)} riders in ${esc(S.me.area)}.</p>
+  <button class="btn" id="post" style="margin-top:10px">Post ride</button></details>
+ <div class="row" style="margin-top:14px"><label class="sw grow" style="margin:0"><input type="checkbox" id="om" ${onlyMine?"checked":""}> Only ${esc(S.me.type)} riders in ${esc(S.me.area)}</label></div>
+ <div class="list">${rs.length?rs.map(r=>{const j=r.going.includes(me);return `<article class="card ride"><div class="time">${esc(r.time)}<small>${fmtDate(r.date)}</small></div>
+ <div><strong>${nm(r.host)}</strong> is riding<br><span class="tag ${mine(r)?"match":""}">${esc(r.type)}</span><span class="tag">${esc(r.area)}</span>
+ <div style="color:var(--mute);font-size:14px;margin-top:4px">${esc(r.spot)} · ${r.going.length} going</div></div>
+ <div><button class="btn sm ${j?"ghost":""}" data-join="${r.id}">${j?"Leave":"Join"}</button>${r.host===me?`<br><button class="btn ghost sm" style="margin-top:6px" data-del="${r.id}">Cancel</button>`:""}</div></article>`}).join(""):`<div class="empty">No rides posted${onlyMine?" for your bike type and area":""} yet. Post the first one and let others know when you're leaving.</div>`}</div>`;
+ $("#om").onchange=e=>{onlyMine=e.target.checked;vRides()};
+ $("#post").onclick=()=>act(()=>api("/rides","POST",{date:$("#rd").value,time:$("#rt").value,spot:$("#rs").value}));
+ document.querySelectorAll("[data-join]").forEach(b=>b.onclick=()=>act(()=>api(`/rides/${b.dataset.join}/join`,"POST")));
+ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>confirm("Cancel this ride?")&&act(()=>api(`/rides/${b.dataset.del}`,"DELETE")));
+}
+function vRiders(){
+ const all=S.riders.filter(r=>r.id!==S.me.id),m=all.filter(mine),o=all.filter(r=>!mine(r));
+ const c=r=>`<div class="card"><strong>${esc(r.name)}</strong><br><span class="tag ${mine(r)?"match":""}">${esc(r.type)}</span><span class="tag">${esc(r.area)}</span></div>`;
+ $("#view").innerHTML=`<details class="card"><summary>Change my bike type or area</summary>
+  <label for="pt">Bike type</label><select id="pt">${TYPES.map(t=>`<option ${t===S.me.type?"selected":""}>${t}</option>`).join("")}</select>
+  <label for="pa">Area</label><input id="pa" maxlength="30" value="${esc(S.me.area)}">
+  <button class="btn" id="sv" style="margin-top:10px">Save profile</button></details>
+ <h3 style="font-size:24px;margin-top:16px">${esc(S.me.type)} riders in ${esc(S.me.area)}</h3>
+ <div class="list">${m.length?m.map(c).join(""):`<div class="empty">No matching riders have signed up yet. Share the link with your riding group.</div>`}</div>
+ ${o.length?`<h3 style="font-size:24px;margin-top:22px">Other riders</h3><div class="list">${o.map(c).join("")}</div>`:""}`;
+ $("#sv").onclick=()=>act(()=>api("/me","PUT",{type:$("#pt").value,area:$("#pa").value}))}
+function prog(id){const me=S.me.id,j=S.rides.filter(r=>r.going.includes(me));
+ if(id==="c1")return j.filter(r=>r.time<"07:00").length;
+ if(id==="c2")return j.filter(r=>r.host!==me).length;
+ if(id==="c3")return S.photos.filter(p=>p.by===me).length;
+ return new Set(j.filter(r=>r.host!==me).map(r=>r.host)).size}
+function vChal(){
+ $("#view").innerHTML=`<div class="list">${CHAL.map(c=>{const p=Math.min(prog(c.id),c.goal);
+  return `<article class="card ${p>=c.goal?"done":""}"><h3 style="font-size:24px">${c.t}</h3><div style="color:var(--mute)">${c.d}</div>
+  <div class="bar" role="progressbar" aria-valuenow="${p}" aria-valuemax="${c.goal}"><i style="width:${p/c.goal*100}%"></i></div><span style="font-size:14px">${p} of ${c.goal}</span></article>`}).join("")}</div>
+  <p class="empty">Challenges update when you join rides and upload photos.</p>`}
+function vGal(){
+ const me=S.me.id;
+ $("#view").innerHTML=`<div class="card"><label for="f" style="margin-top:0">Add a photo</label><input id="f" type="file" accept="image/*">
+ <label for="cap">Caption</label><input id="cap" maxlength="80" placeholder="Where was this?">
+ <p id="gerr" style="color:var(--amber);margin:8px 0 0" role="alert"></p><button class="btn" id="up" style="margin-top:10px">Upload photo</button></div>
+ <div class="grid">${S.photos.map(p=>`<figure><img src="${esc(p.url)}" alt="${esc(p.cap||"Ride photo")}" loading="lazy"><figcaption><strong>${nm(p.by)}</strong>${p.cap?" – "+esc(p.cap):""}<br>
+ <button class="btn ghost sm" data-like="${p.id}">♥ ${p.likes.length}${p.likes.includes(me)?" (liked)":""}</button></figcaption></figure>`).join("")}</div>
+ ${S.photos.length?"":`<div class="empty">No photos yet. Add the first shot from your ride.</div>`}`;
+ $("#up").onclick=()=>{const f=$("#f").files[0];if(!f){$("#gerr").textContent="Choose a photo first.";return}
+  const img=new Image;img.onload=()=>{const k=Math.min(1,900/Math.max(img.width,img.height)),c=document.createElement("canvas");
+   c.width=img.width*k;c.height=img.height*k;c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+   act(()=>api("/photos","POST",{cap:$("#cap").value,image:c.toDataURL("image/jpeg",.75)}))};
+  img.onerror=()=>{$("#gerr").textContent="That file couldn't be read as an image."};img.src=URL.createObjectURL(f)};
+ document.querySelectorAll("[data-like]").forEach(b=>b.onclick=()=>act(()=>api(`/photos/${b.dataset.like}/like`,"POST")));
+}
+load(true);
+</script>
+</body>
+</html>
