@@ -21,9 +21,10 @@ const MIME={'.jpg':'image/jpeg','.png':'image/png','.webp':'image/webp'};
 http.createServer(async(req,res)=>{
  const url=req.url.split('?')[0],ip=req.socket.remoteAddress;
  try{
-  if(req.method==='GET'&&url==='/'){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','X-Content-Type-Options':'nosniff',
+  if(req.method==='GET'&&url==='/'){let page;try{page=fs.readFileSync(path.join(__dirname,'public','index.html'))}catch(e){console.error('Missing public/index.html next to server.js:',e.message);return send(res,500,{error:'App files missing: public/index.html was not found next to server.js.'})}
+   res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','X-Content-Type-Options':'nosniff',
    'Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'"});
-   return res.end(fs.readFileSync(path.join(__dirname,'public','index.html')))}
+   return res.end(page)}
   let m=/^\/uploads\/([a-f0-9]{16}\.(jpg|png|webp))$/.exec(url);
   if(req.method==='GET'&&m){const f=path.join(UP,m[1]);if(!fs.existsSync(f))return send(res,404,{error:'Not found'});
    res.writeHead(200,{'Content-Type':MIME['.'+m[2]],'X-Content-Type-Options':'nosniff','Cache-Control':'public,max-age=31536000,immutable'});return res.end(fs.readFileSync(f))}
@@ -52,15 +53,4 @@ http.createServer(async(req,res)=>{
   if(req.method==='POST'&&(m=/^\/api\/rides\/(\w+)\/join$/.exec(url))){const r=db.rides.find(x=>x.id===m[1]);
    if(!r)return send(res,404,{error:'Ride not found.'});r.going=toggle(r.going,me.id);save();return send(res,200,{ok:true})}
   if(req.method==='DELETE'&&(m=/^\/api\/rides\/(\w+)$/.exec(url))){const r=db.rides.find(x=>x.id===m[1]);
-   if(!r||r.host!==me.id)return send(res,403,{error:'Only the host can cancel a ride.'});db.rides=db.rides.filter(x=>x!==r);save();return send(res,200,{ok:true})}
-  if(req.method==='POST'&&url==='/api/photos'){const d=/^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+\/=]+)$/.exec(String(b.image||''));
-   if(!d)return send(res,400,{error:'Upload a JPEG, PNG or WebP image.'});const buf=Buffer.from(d[2],'base64'),h=buf.subarray(0,4).toString('hex');
-   const ok=(d[1]==='jpeg'&&h.startsWith('ffd8ff'))||(d[1]==='png'&&h==='89504e47')||(d[1]==='webp'&&buf.subarray(0,4).toString()==='RIFF');
-   if(!ok||buf.length>2.5e6)return send(res,400,{error:'That image is invalid or too large.'});
-   const ext={jpeg:'jpg',png:'png',webp:'webp'}[d[1]],name=rid()+'.'+ext;fs.writeFileSync(path.join(UP,name),buf);
-   db.photos.push({id:rid(),by:me.id,cap:cl(b.cap,80),url:'/uploads/'+name,likes:[],at:Date.now()});save();return send(res,200,{ok:true})}
-  if(req.method==='POST'&&(m=/^\/api\/photos\/(\w+)\/like$/.exec(url))){const p=db.photos.find(x=>x.id===m[1]);
-   if(!p)return send(res,404,{error:'Photo not found.'});p.likes=toggle(p.likes,me.id);save();return send(res,200,{ok:true})}
-  send(res,404,{error:'Not found'});
- }catch(e){send(res,400,{error:'Bad request'})}
-}).listen(PORT,()=>console.log('Rideout running on port '+PORT));
+   if(!r||r.host!==me.id)return send(res,403,{error:'Only
